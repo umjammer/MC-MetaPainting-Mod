@@ -13,7 +13,6 @@ import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.decoration.painting.PaintingMotive;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
@@ -28,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
+import static net.metacraft.mod.PaintingModInitializer.LOGGER;
 
 public class MetaPaintingEntity extends AbstractDecorationEntity {
 
@@ -54,11 +54,11 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
         setColors(colors);
         List<PaintingMotive> list = Lists.newArrayList();
         int i = 0;
-        Iterator iterator = Registry.PAINTING_MOTIVE.iterator();
+        Iterator<PaintingMotive> iterator = Registry.PAINTING_MOTIVE.iterator();
 
         PaintingMotive paintingMotive2;
         while (iterator.hasNext()) {
-            paintingMotive2 = (PaintingMotive) iterator.next();
+            paintingMotive2 = iterator.next();
             this.motive = paintingMotive2;
             this.setFacing(direction);
             if (this.canStayAttached()) {
@@ -74,7 +74,7 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
             iterator = list.iterator();
 
             while (iterator.hasNext()) {
-                paintingMotive2 = (PaintingMotive) iterator.next();
+                paintingMotive2 = iterator.next();
                 if (paintingMotive2.getWidth() * paintingMotive2.getHeight() < i) {
                     iterator.remove();
                 }
@@ -156,7 +156,7 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
 
 
     public void onBreak(@Nullable Entity entity) {
-        System.out.println("onBreak");
+        LOGGER.info("onBreak");
         ItemStack itemStack = this.getHeldItemStack();
         this.setHeldItemStack(ItemStack.EMPTY);
         if (this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
@@ -192,11 +192,11 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
 
     @Override
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
-        System.out.println("onSpawnPacket");
         BlockPos pos = ((MetaPaintingSpawnS2CPacket) packet).getPos();
         this.attachmentPos = ((MetaPaintingSpawnS2CPacket) packet).getPos();
         setFacing(((MetaPaintingSpawnS2CPacket) packet).getFacing());
         motive = ((MetaPaintingSpawnS2CPacket) packet).getMotive();
+        LOGGER.info("onSpawnPacket: " + motive);
         double d = pos.getX();
         double e = pos.getY();
         double f = pos.getZ();

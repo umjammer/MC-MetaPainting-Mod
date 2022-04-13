@@ -1,9 +1,15 @@
 package net.metacraft.mod.painting;
 
+import static net.metacraft.mod.PaintingModInitializer.LOGGER;
+
 import net.metacraft.mod.utils.Constants;
 import net.minecraft.block.MapColor;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.texture.NativeImageBackedTexture;
@@ -11,9 +17,13 @@ import net.minecraft.client.texture.PaintingManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.painting.PaintingMotive;
-import net.minecraft.item.map.MapState;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Matrix3f;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3f;
 
 public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntity> {
 
@@ -28,7 +38,7 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
         texture = new NativeImageBackedTexture(Constants.TEXTURE_WEIGHT, Constants.TEXTURE_HEIGHT, true);
         Identifier identifier = client.getTextureManager().registerDynamicTexture("painting/1", this.texture);
         this.renderLayer = RenderLayer.getText(identifier);
-        System.out.println("MCPaintingEntityRenderer  init");
+        LOGGER.info("MCPaintingEntityRenderer  init");
     }
 
     private void updateTexture(byte[] colors) {
@@ -37,9 +47,9 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
                 int k = j + i * Constants.TEXTURE_WEIGHT;
                 int l = colors[k] & 255;
                 if (l / 4 == 0) {
-                    this.texture.getImage().setPixelColor(j, i, 0);
+                    this.texture.getImage().setColor(j, i, 0);
                 } else {
-                    this.texture.getImage().setPixelColor(j, i, MapColor.COLORS[l / 4].getRenderColor(l & 3));
+                    this.texture.getImage().setColor(j, i, MapColor.COLORS[l / 4].getRenderColor(l & 3));
                 }
             }
         }
@@ -89,7 +99,7 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
     }
 
     private void paintingTexture(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light) {
-        Matrix4f matrix4f = matrixStack.peek().getModel();
+        Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(this.renderLayer);
         vertexConsumer.vertex(matrix4f, 0.0F, 128.0F, -0.01F).color(255, 255, 255, 255).texture(0.0F, 1.0F).light(light).next();
         vertexConsumer.vertex(matrix4f, 128.0F, 128.0F, -0.01F).color(255, 255, 255, 255).texture(1.0F, 1.0F).light(light).next();
@@ -103,10 +113,11 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
 
     private void renderPainting(MatrixStack matrices, VertexConsumer vertexConsumer, MetaPaintingEntity entity, int width, int height, Sprite paintingSprite, Sprite backSprite) {
         MatrixStack.Entry entry = matrices.peek();
-        Matrix4f matrix4f = entry.getModel();
-        Matrix3f matrix3f = entry.getNormal();
-        float f = (float)(-width) / 2.0F;
-        float g = (float)(-height) / 2.0F;
+        Matrix4f matrix4f = entry.getPositionMatrix();
+        Matrix3f matrix3f = entry.getNormalMatrix();
+        float f = (-width) / 2.0F;
+        float g = (-height) / 2.0F;
+        @SuppressWarnings("unused")
         float h = 0.5F;
         float i = backSprite.getMinU();
         float j = backSprite.getMaxU();
@@ -122,40 +133,40 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
         float t = backSprite.getMaxV();
         int u = width / 16;
         int v = height / 16;
-        double d = 16.0D / (double)u;
-        double e = 16.0D / (double)v;
+        double d = 16.0D / u;
+        double e = 16.0D / v;
 
-        for(int w = 0; w < u; ++w) {
+        for (int w = 0; w < u; ++w) {
             for(int x = 0; x < v; ++x) {
-                float y = f + (float)((w + 1) * 16);
-                float z = f + (float)(w * 16);
-                float aa = g + (float)((x + 1) * 16);
-                float ab = g + (float)(x * 16);
+                float y = f + (w + 1) * 16;
+                float z = f + w * 16;
+                float aa = g + (x + 1) * 16;
+                float ab = g + x * 16;
                 int ac = entity.getBlockX();
-                int ad = MathHelper.floor(entity.getY() + (double)((aa + ab) / 2.0F / 16.0F));
+                int ad = MathHelper.floor(entity.getY() + (aa + ab) / 2.0F / 16.0F);
                 int ae = entity.getBlockZ();
                 Direction direction = entity.getHorizontalFacing();
                 if (direction == Direction.NORTH) {
-                    ac = MathHelper.floor(entity.getX() + (double)((y + z) / 2.0F / 16.0F));
+                    ac = MathHelper.floor(entity.getX() + (y + z) / 2.0F / 16.0F);
                 }
 
                 if (direction == Direction.WEST) {
-                    ae = MathHelper.floor(entity.getZ() - (double)((y + z) / 2.0F / 16.0F));
+                    ae = MathHelper.floor(entity.getZ() - (y + z) / 2.0F / 16.0F);
                 }
 
                 if (direction == Direction.SOUTH) {
-                    ac = MathHelper.floor(entity.getX() - (double)((y + z) / 2.0F / 16.0F));
+                    ac = MathHelper.floor(entity.getX() - (y + z) / 2.0F / 16.0F);
                 }
 
                 if (direction == Direction.EAST) {
-                    ae = MathHelper.floor(entity.getZ() + (double)((y + z) / 2.0F / 16.0F));
+                    ae = MathHelper.floor(entity.getZ() + (y + z) / 2.0F / 16.0F);
                 }
 
                 int af = WorldRenderer.getLightmapCoordinates(entity.world, new BlockPos(ac, ad, ae));
-                float ag = paintingSprite.getFrameU(d * (double)(u - w));
-                float ah = paintingSprite.getFrameU(d * (double)(u - (w + 1)));
-                float ai = paintingSprite.getFrameV(e * (double)(v - x));
-                float aj = paintingSprite.getFrameV(e * (double)(v - (x + 1)));
+                float ag = paintingSprite.getFrameU(d * (u - w));
+                float ah = paintingSprite.getFrameU(d * (u - (w + 1)));
+                float ai = paintingSprite.getFrameV(e * (v - x));
+                float aj = paintingSprite.getFrameV(e * (v - (x + 1)));
                 this.vertex(matrix4f, matrix3f, vertexConsumer, y, ab, ah, ai, -0.5F, 0, 0, -1, af);
                 this.vertex(matrix4f, matrix3f, vertexConsumer, z, ab, ag, ai, -0.5F, 0, 0, -1, af);
                 this.vertex(matrix4f, matrix3f, vertexConsumer, z, aa, ag, aj, -0.5F, 0, 0, -1, af);
@@ -182,10 +193,9 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
                 this.vertex(matrix4f, matrix3f, vertexConsumer, z, aa, q, s, 0.5F, 1, 0, 0, af);
             }
         }
-
     }
 
     private void vertex(Matrix4f modelMatrix, Matrix3f normalMatrix, VertexConsumer vertexConsumer, float x, float y, float u, float v, float z, int normalX, int normalY, int normalZ, int light) {
-        vertexConsumer.vertex(modelMatrix, x, y, z).color(255, 255, 255, 255).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(normalMatrix, (float) normalX, (float) normalY, (float) normalZ).next();
+        vertexConsumer.vertex(modelMatrix, x, y, z).color(255, 255, 255, 255).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(normalMatrix, normalX, normalY, normalZ).next();
     }
 }

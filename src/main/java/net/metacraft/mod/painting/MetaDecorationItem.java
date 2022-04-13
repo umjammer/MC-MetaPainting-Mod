@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
+import static net.metacraft.mod.PaintingModInitializer.LOGGER;
 
 public class MetaDecorationItem extends Item {
 
@@ -34,18 +35,18 @@ public class MetaDecorationItem extends Item {
         } else {
             World world = context.getWorld();
             Object painting;
-            System.out.println("MCDecorationItem colors : " + colors);
+            LOGGER.info("MCDecorationItem colors : " + colors);
             painting = new MetaPaintingEntity(world, blockPos2, direction, colors);
             NbtCompound nbtCompound = itemStack.getNbt();
             if (nbtCompound != null) {
-                EntityType.loadFromEntityNbt(world, playerEntity, (Entity)painting, nbtCompound);
+                EntityType.loadFromEntityNbt(world, playerEntity, (Entity) painting, nbtCompound);
             }
 
             if (((AbstractDecorationEntity)painting).canStayAttached()) {
                 if (!world.isClient) {
-                    ((AbstractDecorationEntity)painting).onPlace();
+                    ((AbstractDecorationEntity) painting).onPlace();
                     world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, blockPos);
-                    world.spawnEntity((Entity)painting);
+                    world.spawnEntity((Entity) painting);
                 }
 
                 itemStack.decrement(1);
@@ -59,7 +60,7 @@ public class MetaDecorationItem extends Item {
     private byte[] getColors(ItemStack itemStack) {
         NbtCompound nbt = itemStack.getNbt();
         if (nbt == null) {
-            System.out.println("MCDecorationItem get nbt is null");
+            LOGGER.info("MCDecorationItem get nbt is null");
             return null;
         }
         return nbt.getByteArray("colors");

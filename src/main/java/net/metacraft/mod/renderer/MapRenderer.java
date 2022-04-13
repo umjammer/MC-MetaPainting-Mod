@@ -1,12 +1,14 @@
 package net.metacraft.mod.renderer;
 
-import net.minecraft.block.MapColor;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.util.Arrays;
 import java.util.Objects;
+
+import net.minecraft.block.MapColor;
 
 
 public class MapRenderer {
@@ -42,14 +44,14 @@ public class MapRenderer {
     }
 
     private static int nearestColor(MapColor[] colors, Color imageColor) {
-        double[] imageVec = {(double) imageColor.getRed() / 255.0, (double) imageColor.getGreen() / 255.0,
-                (double) imageColor.getBlue() / 255.0};
+        double[] imageVec = {imageColor.getRed() / 255.0, imageColor.getGreen() / 255.0,
+                imageColor.getBlue() / 255.0};
         int best_color = 0;
         double lowest_distance = 10000;
         for (int k = 0; k < colors.length; k++) {
             Color mcColor = new Color(colors[k].color);
-            double[] mcColorVec = {(double) mcColor.getRed() / 255.0, (double) mcColor.getGreen() / 255.0,
-                    (double) mcColor.getBlue() / 255.0};
+            double[] mcColorVec = {mcColor.getRed() / 255.0, mcColor.getGreen() / 255.0,
+                    mcColor.getBlue() / 255.0};
             for (int shadeInd = 0; shadeInd < shadeCoeffs.length; shadeInd++) {
                 double distance = distance(imageVec, applyShade(mcColorVec, shadeInd));
                 if (distance < lowest_distance) {
@@ -76,10 +78,10 @@ public class MapRenderer {
         final int pixelLength = 4;
         for (int pixel = 0, row = 0, col = 0; pixel + 3 < pixels.length; pixel += pixelLength) {
             int argb = 0;
-            argb += (((int) pixels[pixel] & 0xff) << 24); // alpha
-            argb += ((int) pixels[pixel + 1] & 0xff); // blue
-            argb += (((int) pixels[pixel + 2] & 0xff) << 8); // green
-            argb += (((int) pixels[pixel + 3] & 0xff) << 16); // red
+            argb += ((pixels[pixel] & 0xff) << 24); // alpha
+            argb += (pixels[pixel + 1] & 0xff); // blue
+            argb += ((pixels[pixel + 2] & 0xff) << 8); // green
+            argb += ((pixels[pixel + 3] & 0xff) << 16); // red
             result[row][col] = argb;
             col++;
             if (col == width) {

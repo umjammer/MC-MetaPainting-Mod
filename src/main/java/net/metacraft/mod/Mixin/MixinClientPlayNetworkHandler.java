@@ -1,7 +1,6 @@
 package net.metacraft.mod.Mixin;
 
 import net.metacraft.mod.MetaEntityType;
-import net.metacraft.mod.PaintingModInitializer;
 import net.metacraft.mod.painting.MetaPaintingEntity;
 import net.metacraft.mod.painting.MetaPaintingSpawnS2CPacket;
 import net.minecraft.client.MinecraftClient;
@@ -20,9 +19,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import static net.metacraft.mod.PaintingModInitializer.LOGGER;
 
 @Mixin(net.minecraft.client.network.ClientPlayNetworkHandler.class)
-public class MixinClientPlayNetworkHandler{
+public class MixinClientPlayNetworkHandler {
 
     @Shadow
     @Final
@@ -57,8 +57,9 @@ public class MixinClientPlayNetworkHandler{
             }
         }
     }
+
     @Inject(at = @At("RETURN"), method = "onPaintingSpawn")
     public void onPaintingSpawn(PaintingSpawnS2CPacket packet, CallbackInfo ci) {
-        System.out.println("MixinClientPlayNetworkHandler onPaintingSpawn " +  packet.getPos().toShortString());
+        LOGGER.info("MixinClientPlayNetworkHandler onPaintingSpawn " +  packet.getPos().toShortString());
     }
 }

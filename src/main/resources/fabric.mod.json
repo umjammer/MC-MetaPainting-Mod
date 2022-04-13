@@ -6,7 +6,7 @@
   "name": "Meta Painting",
   "description": "creating meta painting for url",
   "authors": [
-    "wupengyang"
+    "wupengyang", "unjammer"
   ],
   "contact": {
     "homepage": "https://github.com/wupengyang1995/MC-MetaPainting-Mod",
@@ -28,12 +28,13 @@
   "mixins": [
     "painting.mixins.json"
   ],
+  "accessWidener" : "metapainting.accesswidener",
 
   "depends": {
-    "fabricloader": ">=0.11.6",
+    "fabricloader": ">=0.13.3",
     "fabric": "*",
-    "minecraft": "1.17.1",
-    "java": ">=16"
+    "minecraft": "1.18.2",
+    "java": ">=17"
   },
   "suggests": {
     "another-mod": "*"
