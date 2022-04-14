@@ -31,7 +31,8 @@ import static net.metacraft.mod.PaintingModInitializer.LOGGER;
 
 public class MetaPaintingEntity extends AbstractDecorationEntity {
 
-    private byte[] colors = new byte[128 * 128];
+    /** PNG raw image */
+    private byte[] colors;
 
     private static final TrackedData<ItemStack> ITEM_STACK;
 
@@ -156,7 +157,7 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
 
 
     public void onBreak(@Nullable Entity entity) {
-        LOGGER.info("onBreak");
+        LOGGER.info("MetaPaintingEntity::onBreak");
         ItemStack itemStack = this.getHeldItemStack();
         this.setHeldItemStack(ItemStack.EMPTY);
         if (this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
@@ -196,7 +197,7 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
         this.attachmentPos = ((MetaPaintingSpawnS2CPacket) packet).getPos();
         setFacing(((MetaPaintingSpawnS2CPacket) packet).getFacing());
         motive = ((MetaPaintingSpawnS2CPacket) packet).getMotive();
-        LOGGER.info("onSpawnPacket: " + motive);
+        LOGGER.info("MetaPaintingEntity::onSpawnPacket: " + motive);
         double d = pos.getX();
         double e = pos.getY();
         double f = pos.getZ();

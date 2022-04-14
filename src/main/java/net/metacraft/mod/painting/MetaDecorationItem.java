@@ -17,6 +17,7 @@ import static net.metacraft.mod.PaintingModInitializer.LOGGER;
 
 public class MetaDecorationItem extends Item {
 
+    /** PNG raw data */
     private byte[] colors;
 
     public MetaDecorationItem(EntityType<? extends AbstractDecorationEntity> type, Settings settings) {
@@ -35,14 +36,14 @@ public class MetaDecorationItem extends Item {
         } else {
             World world = context.getWorld();
             Object painting;
-            LOGGER.info("MCDecorationItem colors : " + colors);
+            LOGGER.info("MetaDecorationItem::useOnBlock: colors: " + colors.length);
             painting = new MetaPaintingEntity(world, blockPos2, direction, colors);
             NbtCompound nbtCompound = itemStack.getNbt();
             if (nbtCompound != null) {
                 EntityType.loadFromEntityNbt(world, playerEntity, (Entity) painting, nbtCompound);
             }
 
-            if (((AbstractDecorationEntity)painting).canStayAttached()) {
+            if (((AbstractDecorationEntity) painting).canStayAttached()) {
                 if (!world.isClient) {
                     ((AbstractDecorationEntity) painting).onPlace();
                     world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, blockPos);
@@ -60,7 +61,7 @@ public class MetaDecorationItem extends Item {
     private byte[] getColors(ItemStack itemStack) {
         NbtCompound nbt = itemStack.getNbt();
         if (nbt == null) {
-            LOGGER.info("MCDecorationItem get nbt is null");
+            LOGGER.info("MetaDecorationItem::getColors: get nbt is null");
             return null;
         }
         return nbt.getByteArray("colors");

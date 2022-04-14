@@ -1,8 +1,8 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.metacraft.mod.Mixin",
-  "compatibilityLevel": "JAVA_16",
+  "package": "net.metacraft.mod.mixin",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [
   ],
   "client": [

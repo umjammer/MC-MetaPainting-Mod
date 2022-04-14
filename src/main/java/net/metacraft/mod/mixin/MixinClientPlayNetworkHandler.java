@@ -1,6 +1,7 @@
-package net.metacraft.mod.Mixin;
+package net.metacraft.mod.mixin;
 
 import net.metacraft.mod.MetaEntityType;
+import net.metacraft.mod.PaintingModInitializer;
 import net.metacraft.mod.painting.MetaPaintingEntity;
 import net.metacraft.mod.painting.MetaPaintingSpawnS2CPacket;
 import net.minecraft.client.MinecraftClient;
@@ -37,7 +38,7 @@ public class MixinClientPlayNetworkHandler {
      */
     @Overwrite
     public void onEntitySpawn(EntitySpawnS2CPacket packet) {
-        NetworkThreadUtils.forceMainThread(packet, (net.minecraft.client.network.ClientPlayNetworkHandler)(Object)this, client);
+        NetworkThreadUtils.forceMainThread(packet, (net.minecraft.client.network.ClientPlayNetworkHandler) (Object) this, client);
         EntityType<?> entityType = packet.getEntityTypeId();
         Entity entity = entityType.create(this.world);
         if (entity != null) {
@@ -60,6 +61,6 @@ public class MixinClientPlayNetworkHandler {
 
     @Inject(at = @At("RETURN"), method = "onPaintingSpawn")
     public void onPaintingSpawn(PaintingSpawnS2CPacket packet, CallbackInfo ci) {
-        LOGGER.info("MixinClientPlayNetworkHandler onPaintingSpawn " +  packet.getPos().toShortString());
+        LOGGER.info("MixinClientPlayNetworkHandler::onPaintingSpawn: " +  packet.getPos().toShortString());
     }
 }

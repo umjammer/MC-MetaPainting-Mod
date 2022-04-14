@@ -1,6 +1,5 @@
 package net.metacraft.mod;
 
-
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -8,7 +7,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.metacraft.mod.network.NetworkManager;
 import net.metacraft.mod.painting.MetaDecorationItem;
-import net.metacraft.mod.renderer.MapRenderer;
 import net.metacraft.mod.utils.Constants;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -21,7 +19,10 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -73,13 +74,27 @@ public class PaintingModInitializer implements ModInitializer {
             return 0;
         }
 
-        source.sendFeedback(new LiteralText("success!"), false);
-        ItemStack stack = new ItemStack(MetaItems.ITEM_META_PAINTING);
-        ((MetaDecorationItem) MetaItems.ITEM_META_PAINTING).saveColor(stack, MapRenderer.render(image));
-        if (!player.getInventory().insertStack(stack)) {
-            player.dropItem(stack, false);
+        try {
+            source.sendFeedback(new LiteralText("success!"), false);
+            ItemStack stack = new ItemStack(MetaItems.ITEM_META_PAINTING);
+            ((MetaDecorationItem) MetaItems.ITEM_META_PAINTING).saveColor(stack, scale(image, Constants.TEXTURE_WIDTH, Constants.TEXTURE_HEIGHT));
+            if (!player.getInventory().insertStack(stack)) {
+                player.dropItem(stack, false);
+            }
+            return 1;
+        } catch (IOException e) {
+            return 0;
         }
-        return 1;
+    }
+
+    byte[] scale(BufferedImage image, int w, int h) throws IOException {
+        Image resizedImage = image.getScaledInstance(w, h, Image.SCALE_DEFAULT);
+        BufferedImage dst = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = dst.createGraphics();
+        g.drawImage(resizedImage, 0, 0, null);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(dst, "PNG", baos);
+        return baos.toByteArray();
     }
 
     private static boolean isValid(String url) {
@@ -87,7 +102,7 @@ public class PaintingModInitializer implements ModInitializer {
             new URL(url).toURI();
             return true;
         } catch (Exception e) {
-            LOGGER.info(url);
+            LOGGER.warn(url, e);
             return false;
         }
     }

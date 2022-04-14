@@ -1,5 +1,8 @@
 package net.metacraft.mod.renderer;
 
+import net.metacraft.mod.utils.Constants;
+import net.minecraft.block.MapColor;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -7,8 +10,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.util.Arrays;
 import java.util.Objects;
-
-import net.minecraft.block.MapColor;
 
 
 public class MapRenderer {
@@ -25,7 +26,7 @@ public class MapRenderer {
     }
 
     public static byte[] render(BufferedImage image) {
-        Image resizedImage = image.getScaledInstance(128, 128, Image.SCALE_DEFAULT);
+        Image resizedImage = image.getScaledInstance(Constants.TEXTURE_WIDTH, Constants.TEXTURE_HEIGHT, Image.SCALE_DEFAULT);
         BufferedImage resized = convertToBufferedImage(resizedImage);
         int width = resized.getWidth();
         int height = resized.getHeight();
