@@ -53,27 +53,45 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
     }
 
     @Override
-    public void render(MetaPaintingEntity paintingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
+    public void render(MetaPaintingEntity paintingEntity, float yaw, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         PaintingMotive paintingMotive = paintingEntity.motive;
 
         matrixStack.push();
         matrixStack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(180.0F));
+
+        float g = (-paintingMotive.getHeight()) / 2.0F;
+
+        int x = 0, y = 0, z = 0;
+        float aa = g + (x + 1) * 16;
+        float ab = g + x * 16;
+
+        int ac = paintingEntity.getBlockX();
+        int ad = MathHelper.floor(paintingEntity.getY() + (aa + ab) / 2.0F / 16.0F);
+        int ae = paintingEntity.getBlockZ();
+
         Direction direction = paintingEntity.getHorizontalFacing();
 
         if (direction == Direction.EAST || direction == Direction.WEST) {
             matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90 * (paintingEntity.getHorizontalFacing().getHorizontal())));
+            if (direction == Direction.EAST) {
+                ae = MathHelper.floor(paintingEntity.getZ() + (y + z) / 2.0F / 16.0F);
+            } else /* if (direction == Direction.WEST) */ {
+                ae = MathHelper.floor(paintingEntity.getZ() - (y + z) / 2.0F / 16.0F);
+            }
         }
         if (direction == Direction.SOUTH) {
             matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
+            ac = MathHelper.floor(paintingEntity.getX() - (y + z) / 2.0F / 16.0F);
         } else if (direction == Direction.NORTH) {
             matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180 * (paintingEntity.getHorizontalFacing().getHorizontal())));
+            ac = MathHelper.floor(paintingEntity.getX() + (y + z) / 2.0F / 16.0F);
         }
         float factor = 1 / 132f;
         float weightScale = (paintingMotive.getWidth() / 16f);
         float heightScale = (paintingMotive.getHeight() / 16f);
         matrixStack.translate(-0.5 * weightScale * (factor) * Constants.TEXTURE_WIDTH, -0.5 * heightScale * (factor) * Constants.TEXTURE_HEIGHT, -0.04);
         matrixStack.scale(factor * weightScale, factor * heightScale, factor * weightScale);
-        int light = 15728850;
+        int light = WorldRenderer.getLightmapCoordinates(paintingEntity.world, new BlockPos(ac, ad, ae));
         byte[] colors = paintingEntity.getColors();
         if (colors != null) {
             updateTexture(colors);
@@ -82,7 +100,7 @@ public class MetaPaintingEntityRenderer extends EntityRenderer<MetaPaintingEntit
 LOGGER.info("MetaPaintingEntityRenderer::render: colors is null");
         }
         matrixStack.pop();
-        super.render(paintingEntity, f, g, matrixStack, vertexConsumerProvider, i);
+        super.render(paintingEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, i);
     }
 
     private void paintingTexture(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light) {
