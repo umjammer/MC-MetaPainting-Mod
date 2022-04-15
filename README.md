@@ -1,10 +1,15 @@
+[![Fabric](https://img.shields.io/badge/Mod_Loader-Fabric-blue)](https://fabricmc.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.18.2-green)](https://www.minecraft.net/)
+
 # MC-MetaPainting-Mod
 
-the mod that you can load the image for url  or local path into minecraft. [Download Mod](https://github.com/wupengyang1995/MC-MetaPainting-Mod/releases/tag/20200919)
+the mod that you can load the image for url  or local path into minecraft.
+
+## Usage
 
 `/createMetaPainting + url`
 
-`/createMetaPainting + localPath`
+`/createMetaPainting + file://localPath`
 
 such as:
 
@@ -18,4 +23,9 @@ and then you get a item
 
 you can use it in wall
 
-![image](https://user-images.githubusercontent.com/90142475/133918021-2d376a29-5b97-4092-9f54-2609b5e95ec5.png)
+![image](https://user-images.githubusercontent.com/493908/163534187-6008f91f-7dc5-4906-8a40-c6e851f6ab87.png)
+
+## Requirs
+
+* MC version 1.18.2
+* fabric
