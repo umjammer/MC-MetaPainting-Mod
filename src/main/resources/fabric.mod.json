@@ -28,7 +28,6 @@
   "mixins": [
     "painting.mixins.json"
   ],
-  "accessWidener" : "metapainting.accesswidener",
 
   "depends": {
     "fabricloader": ">=0.13.3",
