@@ -1,9 +1,8 @@
-package net.metacraft.mod.painting;
+package net.metacraft.mod.minecraft;
 
 import com.google.common.collect.Lists;
-import net.metacraft.mod.MetaEntityType;
-import net.metacraft.mod.MetaItems;
-import net.metacraft.mod.network.NetworkManager;
+import net.metacraft.mod.MetaPaintingMod;
+import net.metacraft.mod.model.MetaPaintingSpawnPacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
@@ -27,7 +26,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
-import static net.metacraft.mod.PaintingModInitializer.LOGGER;
+
+import static net.metacraft.mod.MetaPaintingMod.LOGGER;
 
 public class MetaPaintingEntity extends AbstractDecorationEntity {
 
@@ -47,19 +47,16 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
     }
 
     public MetaPaintingEntity(EntityType<? extends MetaPaintingEntity> entityType, World world) {
-        super(MetaEntityType.ENTITY_TYPE_META_PAINTING, world);
+        super(MetaPaintingMod.ENTITY_TYPE_META_PAINTING, world);
     }
 
     MetaPaintingEntity(World world, BlockPos pos, Direction direction, byte[] colors) {
-        super(MetaEntityType.ENTITY_TYPE_META_PAINTING, world, pos);
+        super(MetaPaintingMod.ENTITY_TYPE_META_PAINTING, world, pos);
         setColors(colors);
         List<PaintingMotive> list = Lists.newArrayList();
         int i = 0;
-        Iterator<PaintingMotive> iterator = Registry.PAINTING_MOTIVE.iterator();
 
-        PaintingMotive paintingMotive2;
-        while (iterator.hasNext()) {
-            paintingMotive2 = iterator.next();
+        for (PaintingMotive paintingMotive2 : Registry.PAINTING_MOTIVE) {
             this.motive = paintingMotive2;
             this.setFacing(direction);
             if (this.canStayAttached()) {
@@ -72,10 +69,10 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
         }
 
         if (!list.isEmpty()) {
-            iterator = list.iterator();
+            Iterator<PaintingMotive> iterator = list.iterator();
 
             while (iterator.hasNext()) {
-                paintingMotive2 = iterator.next();
+                PaintingMotive paintingMotive2 = iterator.next();
                 if (paintingMotive2.getWidth() * paintingMotive2.getHeight() < i) {
                     iterator.remove();
                 }
@@ -155,15 +152,13 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
         this.getDataTracker().set(ITEM_STACK, value);
     }
 
-
     public void onBreak(@Nullable Entity entity) {
         LOGGER.info("MetaPaintingEntity::onBreak");
         ItemStack itemStack = this.getHeldItemStack();
         this.setHeldItemStack(ItemStack.EMPTY);
         if (this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
             this.playSound(SoundEvents.ENTITY_PAINTING_BREAK, 1.0F, 1.0F);
-            if (entity instanceof PlayerEntity) {
-                PlayerEntity playerEntity = (PlayerEntity) entity;
+            if (entity instanceof PlayerEntity playerEntity) {
                 if (playerEntity.getAbilities().creativeMode) {
                     return;
                 }
@@ -171,7 +166,6 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
             this.dropStack(itemStack);
         }
     }
-
 
     public void onPlace() {
         this.playSound(SoundEvents.ENTITY_PAINTING_PLACE, 1.0F, 1.0F);
@@ -188,15 +182,15 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
 
     @Override
     public Packet<?> createSpawnPacket() {
-        return NetworkManager.SERVER_MetaPainting.toPacket(new MetaPaintingSpawnS2CPacket(this));
+        return MetaPaintingMod.newPacket(MetaPaintingSpawnPacket.IDENTIFIER, new MetaPaintingSpawnPacket(this).toBuffer());
     }
 
     @Override
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
-        BlockPos pos = ((MetaPaintingSpawnS2CPacket) packet).getPos();
-        this.attachmentPos = ((MetaPaintingSpawnS2CPacket) packet).getPos();
-        setFacing(((MetaPaintingSpawnS2CPacket) packet).getFacing());
-        motive = ((MetaPaintingSpawnS2CPacket) packet).getMotive();
+        BlockPos pos = ((MetaPaintingSpawnPacket) packet).getPos();
+        this.attachmentPos = ((MetaPaintingSpawnPacket) packet).getPos();
+        setFacing(((MetaPaintingSpawnPacket) packet).getFacing());
+        motive = ((MetaPaintingSpawnPacket) packet).getMotive();
         LOGGER.info("MetaPaintingEntity::onSpawnPacket: " + motive);
         double d = pos.getX();
         double e = pos.getY();
@@ -204,10 +198,10 @@ public class MetaPaintingEntity extends AbstractDecorationEntity {
         this.setPosition(d, e, f);
         this.setId(packet.getId());
         this.setUuid(packet.getUuid());
-        this.setColors(((MetaPaintingSpawnS2CPacket) packet).getColors());
+        this.setColors(((MetaPaintingSpawnPacket) packet).getColors());
     }
 
     protected ItemStack getAsItemStack() {
-        return new ItemStack(MetaItems.ITEM_META_PAINTING);
+        return new ItemStack(MetaPaintingMod.ITEM_META_PAINTING);
     }
 }

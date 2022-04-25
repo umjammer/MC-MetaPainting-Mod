@@ -1,6 +1,5 @@
-package net.metacraft.mod.painting;
+package net.metacraft.mod.minecraft;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,14 +12,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
-import static net.metacraft.mod.PaintingModInitializer.LOGGER;
+import static net.metacraft.mod.MetaPaintingMod.LOGGER;
 
-public class MetaDecorationItem extends Item {
+public class MetaPaintingItem extends Item {
 
     /** PNG raw data */
     private byte[] colors;
 
-    public MetaDecorationItem(EntityType<? extends AbstractDecorationEntity> type, Settings settings) {
+    public MetaPaintingItem(EntityType<? extends AbstractDecorationEntity> type, Settings settings) {
         super(settings);
     }
 
@@ -35,19 +34,19 @@ public class MetaDecorationItem extends Item {
             return ActionResult.FAIL;
         } else {
             World world = context.getWorld();
-            Object painting;
-            LOGGER.info("MetaDecorationItem::useOnBlock: colors: " + colors.length);
+            AbstractDecorationEntity painting;
+            LOGGER.info("MetaPaintingItem::useOnBlock: colors: " + colors.length);
             painting = new MetaPaintingEntity(world, blockPos2, direction, colors);
             NbtCompound nbtCompound = itemStack.getNbt();
             if (nbtCompound != null) {
-                EntityType.loadFromEntityNbt(world, playerEntity, (Entity) painting, nbtCompound);
+                EntityType.loadFromEntityNbt(world, playerEntity, painting, nbtCompound);
             }
 
-            if (((AbstractDecorationEntity) painting).canStayAttached()) {
+            if (painting.canStayAttached()) {
                 if (!world.isClient) {
-                    ((AbstractDecorationEntity) painting).onPlace();
+                    painting.onPlace();
                     world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, blockPos);
-                    world.spawnEntity((Entity) painting);
+                    world.spawnEntity(painting);
                 }
 
                 itemStack.decrement(1);
@@ -61,7 +60,7 @@ public class MetaDecorationItem extends Item {
     private byte[] getColors(ItemStack itemStack) {
         NbtCompound nbt = itemStack.getNbt();
         if (nbt == null) {
-            LOGGER.info("MetaDecorationItem::getColors: get nbt is null");
+            LOGGER.info("MetaPaintingItem::getColors: get nbt is null");
             return null;
         }
         return nbt.getByteArray("colors");

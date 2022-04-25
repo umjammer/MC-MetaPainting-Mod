@@ -1,22 +1,22 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
 
-package net.metacraft.mod.painting;
+package net.metacraft.mod.model;
 
-import net.metacraft.mod.network.ClientNetworkCallbackImpl;
-import net.metacraft.mod.network.Packet;
+import net.metacraft.mod.MetaPaintingMod;
+import net.metacraft.mod.minecraft.MetaPaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingMotive;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 
 import java.util.UUID;
 
-public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements Packet {
+public class MetaPaintingSpawnPacket extends EntitySpawnS2CPacket {
+
+    public static Identifier IDENTIFIER = new Identifier(MetaPaintingMod.MOD_ID, "meta_painting");
+
     private final int id;
     private final UUID uuid;
     private final BlockPos pos;
@@ -24,7 +24,7 @@ public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements 
     private final byte[] colors;
     private final int motiveId;
 
-    public MetaPaintingSpawnS2CPacket(MetaPaintingEntity entity) {
+    public MetaPaintingSpawnPacket(MetaPaintingEntity entity) {
         super(entity);
         this.id = entity.getId();
         this.uuid = entity.getUuid();
@@ -34,7 +34,7 @@ public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements 
         this.colors = entity.getColors();
     }
 
-    public MetaPaintingSpawnS2CPacket(PacketByteBuf buf) {
+    public MetaPaintingSpawnPacket(PacketByteBuf buf) {
         super(buf);
         this.id = buf.readVarInt();
         this.uuid = buf.readUuid();
@@ -79,13 +79,9 @@ public class MetaPaintingSpawnS2CPacket extends EntitySpawnS2CPacket implements 
         return colors;
     }
 
-    @Override
-    public void onPacket() {
-        ClientNetworkCallbackImpl.INSTANCE.handleMetaPaintingPacket(this);
-    }
-
-    @Override
-    public void toBuffer(PacketByteBuf buffer) {
+    public PacketByteBuf toBuffer() {
+        PacketByteBuf buffer = MetaPaintingMod.newPacketByteBuf();
         write(buffer);
+        return buffer;
     }
 }
